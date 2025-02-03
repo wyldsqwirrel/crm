@@ -1,0 +1,36 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+class CRMModel(models.Model):
+    """Represents a CRM entity like Customers, Leads, etc."""
+    name = models.CharField(max_length=255)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class CustomField(models.Model):
+    """Stores custom fields for CRM models."""
+    FIELD_TYPES = [
+        ('text', 'Text'),
+        ('number', 'Number'),
+        ('date', 'Date'),
+        ('boolean', 'Boolean'),
+        ('email', 'Email'),
+        ('phone', 'Phone Number'),
+    ]
+
+    name = models.CharField(max_length=255)
+    field_type = models.CharField(max_length=20, choices=FIELD_TYPES)
+    model = models.ForeignKey(CRMModel, on_delete=models.CASCADE, related_name="custom_fields")
+
+    def __str__(self):
+        return f"{self.name} ({self.field_type})"
+
+class CRMRecord(models.Model):
+    """Stores the actual CRM data for each entity."""
+    model = models.ForeignKey(CRMModel, on_delete=models.CASCADE)
+    data = models.JSONField()  # Store flexible field data as JSON
+
+    def __str__(self):
+        return f"Record for {self.model.name}"
